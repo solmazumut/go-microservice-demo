@@ -1,12 +1,47 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
+	"context"
+	"goMicroserviceDemo/Service"
+	"goMicroserviceDemo/kafka"
 	"log"
-	"net/http"
+	"os"
+	"os/signal"
 )
+const topic = "demo-topic"
+const broker ="localhost:9092"
 
+func main() {
+	receivedEvent := make(chan string)
+	ctx, cancel := context.WithCancel(context.Background())
+
+	eventPrinterService := Service.EventPrinter{}
+	eventListener := kafka.NewEventListener(broker,topic, ctx)
+
+	var terminate chan os.Signal = make(chan os.Signal, 1)
+	signal.Notify(terminate, os.Interrupt)
+
+	go eventListener.StartAndListenAndPushToChannel("deafult", receivedEvent)
+
+	for{
+		select {
+		case received := <-receivedEvent:
+			eventPrinterService.Print(received)
+		case  <- terminate:
+			cancel()
+			<-receivedEvent
+			log.Println("exiting..")
+			os.Exit(1)
+
+		}
+	}
+}
+
+
+
+
+
+/*
 type Article struct {
 	Title string `json:"title"`
 	Desc string `json:"desc"`
@@ -31,9 +66,10 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 func handleRequests() {
 	http.HandleFunc("/", homePage)
 	http.HandleFunc("/articles", allArticles)
-	log.Fatal(http.ListenAndServe(":8081", nil))
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
 func main() {
 	handleRequests()
 }
+*/
