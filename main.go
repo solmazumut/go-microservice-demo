@@ -2,32 +2,40 @@ package main
 
 import (
 	"context"
+	"goMicroserviceDemo/Rest"
 	"goMicroserviceDemo/Service"
 	"goMicroserviceDemo/kafka"
 	"log"
 	"os"
 	"os/signal"
 )
-const topic = "demo-topic"
-const broker ="localhost:9092"
+
+const topic = "demo"
+const broker = "kafka:9092"
 
 func main() {
+	restObject := Rest.RestObject{}
+
 	receivedEvent := make(chan string)
 	ctx, cancel := context.WithCancel(context.Background())
 
 	eventPrinterService := Service.EventPrinter{}
-	eventListener := kafka.NewEventListener(broker,topic, ctx)
+	eventListener := kafka.NewEventListener(broker, topic, ctx)
 
 	var terminate chan os.Signal = make(chan os.Signal, 1)
 	signal.Notify(terminate, os.Interrupt)
 
 	go eventListener.StartAndListenAndPushToChannel("deafult", receivedEvent)
 
-	for{
+	tmp := "merhaba"
+	go restObject.GetRequest(tmp)
+
+	for {
 		select {
 		case received := <-receivedEvent:
 			eventPrinterService.Print(received)
-		case  <- terminate:
+			tmp = received
+		case <-terminate:
 			cancel()
 			<-receivedEvent
 			log.Println("exiting..")
@@ -35,11 +43,8 @@ func main() {
 
 		}
 	}
+
 }
-
-
-
-
 
 /*
 type Article struct {
