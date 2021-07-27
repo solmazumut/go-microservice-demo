@@ -1,5 +1,10 @@
 package main
 
+/*
+docker run -it --network==host confluentinc/cp-kafkacat -L -b localhost:9092
+docker run -it --network=host confluentinc/cp-kafkacat kafkacat -b localhost:9092 -t demo-topic -P -K: -p 0
+ */
+
 import (
 	"context"
 	"goMicroserviceDemo/Rest"
@@ -10,7 +15,7 @@ import (
 	"os/signal"
 )
 
-const topic = "demo"
+const topic = "demo-topic"
 const broker = "kafka:9092"
 
 func main() {

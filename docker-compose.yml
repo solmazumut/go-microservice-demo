@@ -1,33 +1,28 @@
 version: "2.0"
-
-
-
 services:
   zookeeper:
-    image: confluent/zookeeper
+    image: wurstmeister/zookeeper:3.4.6
     container_name: zookeeper
     ports:
       - 2181:2181
+    networks:
+      - myNetwork
   kafka:
-    image: confluent/kafka
+    image:  wurstmeister/kafka:2.13-2.7.0
     container_name: kafka
-    depends_on:
-      - zookeeper
     ports:
       - 9092:9092
+    links:
+      - zookeeper
+    networks:
+      - myNetwork
     
     environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 3
-      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 3
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 3
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
-
-      KAFKA_ADVERTISED_HOST_NAME: localhost
+      KAFKA_ADVERTISED_HOST_NAME: kafka
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_CREATE_TOPICS: "demo:3:1" 
+      KAFKA_ADVERTISED_PORT: 9092
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_CREATE_TOPICS: "demo-topic:3:1"
       
 
   web:
@@ -37,4 +32,9 @@ services:
     depends_on:
       - zookeeper
       - kafka
+    networks:
+      - myNetwork
 
+networks:
+  myNetwork:
+    driver: bridge

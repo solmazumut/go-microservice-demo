@@ -41,7 +41,7 @@ func (eventListener *eventListener) StartAndListenAndPushToChannel(groupId strin
 			if err != nil {
 				log.Println("cannot read message " + err.Error())
 			}
-			event <- fmt.Sprintf("Partition: %d, Offset: %d, Message: %s", msg.Partition, msg.Offset, string(msg.Value))
+			event <- fmt.Sprintf("Partition: %d, Offset: %d, Message: %s, Topic: %s", msg.Partition, msg.Offset, string(msg.Value), string(msg.Topic))
 		}
 	}
 }

@@ -31,6 +31,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Homepage Endpoint Hit")
 }
 func testPage(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("konsol log: test endpointine geldi")
 	fmt.Fprintf(w, "test")
 }
 
